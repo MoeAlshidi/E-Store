@@ -1,6 +1,6 @@
 
 from django.db import models
-
+from django.core import validators
 # Create your models here.
 
 
@@ -24,12 +24,14 @@ class Promotions(models.Model):
 class Product(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(default='-')
-    description = models.TextField()
-    unit_price = models.DecimalField(decimal_places=2, max_digits=6)
-    inventory = models.IntegerField()
+    description = models.TextField(null=True, blank=True)
+    unit_price = models.DecimalField(
+        decimal_places=2, max_digits=6, validators=[validators.MinValueValidator(1)])
+    inventory = models.IntegerField(
+        validators=[validators.MinValueValidator(1)])
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
-    promotions = models.ManyToManyField(Promotions,)
+    promotions = models.ManyToManyField(Promotions, blank=True)
 
     def __str__(self) -> str:
         return self.title
