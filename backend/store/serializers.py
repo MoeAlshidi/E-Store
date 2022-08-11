@@ -7,7 +7,9 @@ from rest_framework import serializers
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ['id', 'title', 'featured_product']
+        fields = ['id', 'title', 'product_count']
+
+    product_count = serializers.IntegerField()
 
 
 class ProductSerializer(serializers.ModelSerializer):

@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Count
 from .models import Collection, Product
 from .serializers import CollectionSerializer, ProductSerializer
 
@@ -39,8 +40,36 @@ def product_detail(request, id):
         return Response(f"{product.title} deleted", status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view()
+# Collection API
+@api_view(['GET', 'POST'])
+def collection_list(request):
+    if request.method == 'GET':
+        query_set = Collection.objects.annotate(
+            product_count=Count('products')).all()
+        instance = CollectionSerializer(query_set, many=True)
+        return Response(instance.data)
+
+    elif request.method == 'POST':
+        serializer = CollectionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PUT", "DELETE"])
 def collection_detail(request, pk):
-    collection = get_object_or_404(Collection, pk=pk)
-    instance = CollectionSerializer(collection)
-    return Response(instance.data)
+    collection = get_object_or_404(Collection.objects.annotate(
+        product_count=Count('products')), pk=pk)
+    if request.method == 'GET':
+        instance = CollectionSerializer(collection)
+        return Response(instance.data)
+    elif request.method == 'PUT':
+        serializer = CollectionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    elif request.method == 'DELETE':
+        if collection.products.count() > 0:
+            return Response({'error': 'Collection cannot be deleted becuase it includes one or more products'})
+        collection.delete()
+        return Response(f"{collection.title} is deleted", status=status.HTTP_204_NO_CONTENT)
