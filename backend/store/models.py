@@ -17,7 +17,7 @@ class Collection(models.Model):
 
 
 class Promotions(models.Model):
-    desctiption = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
     discount = models.FloatField()
 
 
@@ -51,7 +51,7 @@ class Customer(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
-    phone = models.IntegerField()
+    phone = models.CharField(null= True, blank=True,max_length=255)
     birth_date = models.DateField(null=True)
     membership = models.CharField(
         max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
@@ -70,7 +70,7 @@ class Order(models.Model):
     PAYMENT_STATUS = [
         (PAYMENT_PENDING, 'Pending'),
         (PAYMENT_COMPLETE, 'Complete'),
-        (PAYMENT_FAILED, 'Faild')
+        (PAYMENT_FAILED, 'Failed')
     ]
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(
