@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'playground',
     'store',
     'tags',
-    'likes'
+    'likes',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
