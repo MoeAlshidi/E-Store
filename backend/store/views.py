@@ -1,14 +1,12 @@
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
-
 from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-
-
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin,DestroyModelMixin
 from .filters import ProductFilter
-from .models import Collection, OrderItem, Product, Review
-from .serializers import CollectionSerializer, ProductSerializer, ReviewSerializer
+from .models import CartItem, Collection, OrderItem, Product, Review,Cart
+from .serializers import CartItemSerializer, CartSerializer, CollectionSerializer, ProductSerializer, ReviewSerializer
 
 
 # Create your views here.
@@ -47,3 +45,21 @@ class ReviewViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {'product_id':self.kwargs['product_pk']}
+
+# Cart ViewSet(Create, Get)
+
+class CartViewSet ( CreateModelMixin,
+                    GenericViewSet,
+                    RetrieveModelMixin,
+                    DestroyModelMixin):
+
+    queryset=Cart.objects.prefetch_related('items__product').all()
+    serializer_class=CartSerializer
+
+
+class CartItemViewSet(ModelViewSet):
+    serializer_class=CartItemSerializer
+    def get_queryset(self):
+        return CartItem.objects\
+            .filter(cart_id=self.kwargs['cart_pk']) \
+            .select_related('product')
